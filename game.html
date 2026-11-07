@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<title>دنیای نگار</title>
+<style>
+:root{--o:#ff5a1f;--y:#ffd34e;--p:#ff80b5;--g:#69d7a0;--ink:#462b27}
+*{box-sizing:border-box}
+body{margin:0;font-family:Tahoma,Arial;background:linear-gradient(160deg,#fff0cf,#ffd9df 52%,#d8f5ff);color:var(--ink);min-height:100vh}
+.wrap{max-width:680px;margin:auto;padding:16px}
+.top{background:linear-gradient(120deg,#ff7a35,#ffb23e);border:4px solid #fff;border-radius:26px;padding:18px;color:white;box-shadow:0 8px 0 #e7a36d;display:flex;justify-content:space-between;align-items:center}
+.top h1{font-size:23px;margin:0 0 7px}
+.coin{background:#fff7d9;color:#80500b;border-radius:18px;padding:10px 13px;font-weight:bold}
+.card{background:#ffffffdc;border:3px solid white;border-radius:23px;padding:16px;margin-top:16px;box-shadow:0 5px 0 #e9c7bb}
+.tabs,.games{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.btn{border:0;border-radius:17px;padding:14px 10px;font-weight:bold;font-size:15px;color:#4a3029;box-shadow:0 4px #d9b9aa;cursor:pointer;background:#ffe17a}
+.btn:active{transform:translateY(3px);box-shadow:0 1px #d9b9aa}
+.pink{background:#ffb5d0}.green{background:#9ee8bd}.blue{background:#a9ddff}.orange{background:#ffad7b}
+.game{min-height:106px;text-align:center;font-size:17px}
+.game b{display:block;font-size:32px;margin-bottom:7px}
+.muted{opacity:.7;font-size:13px}
+.hidden{display:none}
+.bar{height:12px;background:#eee;border-radius:9px;overflow:hidden;margin:10px 0}
+.bar span{display:block;height:100%;background:#62c98f;width:0}
+.playarea{min-height:240px;background:linear-gradient(#b9ecff,#fdf0c4);border-radius:20px;padding:14px;text-align:center;position:relative;overflow:hidden}
+.food{font-size:42px;padding:9px}
+.choices{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-top:12px}
+.avatar{font-size:48px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px;border-bottom:1px dashed #e4c9bd}
+.small{font-size:12px}
+.notice{padding:10px;border-radius:14px;background:#fff1c4;margin-top:10px}
+select{border:2px solid #ffd08a;border-radius:12px;padding:10px;background:white;color:#543}
+.title{font-weight:bold;margin:0 0 10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <div><h1>🍊 دنیای رستوران نگار</h1><div>بازی کن، امتیاز بگیر و قهرمان شو!</div></div>
+  <div class="coin">💶 <span id="balance">0</span></div>
+</header>
+
+<section id="home" class="card">
+  <h3 class="title">سلام قهرمان! 👋</h3>
+  <p class="muted">چه کاری انجام بدیم؟</p>
+  <div class="tabs">
+    <button class="btn orange" onclick="show('games')">🎮 بازی‌ها</button>
+    <button class="btn pink" onclick="show('character')">🧑‍🍳 کاراکتر من</button>
+    <button class="btn green" onclick="show('rank')">🏆 رتبه‌بندی</button>
+    <button class="btn blue" onclick="show('battle')">⚔️ مبارزه</button>
+  </div>
+  <div class="notice">امتیازها مجازی‌اند و فقط داخل بازی استفاده می‌شوند.</div>
+</section>
+
+<section id="games" class="card hidden">
+  <button class="btn" onclick="show('home')">⬅ بازگشت</button>
+  <h3>چه بازی‌ای انتخاب می‌کنی؟</h3>
+  <div class="games">
+    <button class="btn game orange" onclick="startGame('catch')"><b>🍕</b>شکار غذا<div class="muted">غذاهای درست را انتخاب کن</div></button>
+    <button class="btn game pink" onclick="startGame('cook')"><b>🍳</b>آشپز سریع<div class="muted">سفارش را درست بساز</div></button>
+    <button class="btn game green" onclick="startGame('serve')"><b>🧑‍🍳</b>سرویس مشتری<div class="muted">سفارش‌ها را به خاطر بسپار</div></button>
+    <button class="btn game blue" onclick="startGame('memory')"><b>🧠</b>حافظه غذایی<div class="muted">جفت‌های مشابه را پیدا کن</div></button>
+  </div>
+</section>
+
+<section id="play" class="card hidden">
+  <button class="btn" onclick="show('games')">⬅ بازی‌ها</button>
+  <h3 id="gameTitle">بازی</h3>
+  <div>مرحله: <select id="difficulty"><option value="easy">آسان</option><option value="medium">متوسط</option><option value="hard">سخت</option></select></div>
+  <div class="bar"><span id="progress"></span></div>
+  <div id="playarea" class="playarea"></div>
+  <p id="gameMsg" class="muted">برای شروع آماده‌ای؟</p>
+  <button class="btn orange" id="begin" onclick="beginRound()">شروع بازی</button>
+</section>
+
+<section id="character" class="card hidden">
+  <button class="btn" onclick="show('home')">⬅ بازگشت</button>
+  <h3>کاراکتر من 🧑‍🍳</h3>
+  <div class="avatar" id="avatar">👩‍🍳</div>
+  <p>شخصیتت را انتخاب کن:</p>
+  <div class="choices">
+    <button class="btn pink" onclick="saveAvatar('👩‍🍳')">👩‍🍳 آشپز</button>
+    <button class="btn blue" onclick="saveAvatar('🧑‍🍳')">🧑‍🍳 سرآشپز</button>
+    <button class="btn green" onclick="saveAvatar('🦊')">🦊 روباه</button>
+    <button class="btn orange" onclick="saveAvatar('🐻')">🐻 خرس</button>
+  </div>
+  <p class="muted">تغییر کاراکتر رایگان است.</p>
+</section>
+
+<section id="rank" class="card hidden">
+  <button class="btn" onclick="show('home')">⬅ بازگشت</button>
+  <h3>🏆 قهرمان‌های نگار</h3>
+  <div id="ranking">در حال دریافت...</div>
+</section>
+
+<section id="battle" class="card hidden">
+  <button class="btn" onclick="show('home')">⬅ بازگشت</button>
+  <h3>⚔️ میدان رقابت</h3>
+  <p>برای رقابت گروهی، از دستور <b>/battle</b> داخل گروه استفاده کن. فعلاً این بخش برای نمایش و آماده‌سازی دعوت‌هاست.</p>
+  <div class="notice">قانون بازی: فقط موجودی مجازی و اقلام داخل بازی قابل جابه‌جایی‌اند؛ حداکثر ۵ قلم در هر رقابت و نه بیشتر از موجودی بازنده.</div>
+  <button class="btn orange" onclick="tg?.openTelegramLink('https://t.me/NegarRestaurantBot?start=battle')">رفتن به ربات</button>
+</section>
+</div>
+
+<script>
+const tg = window.Telegram?.WebApp;
+tg?.ready();
+tg?.expand();
+
+const API = "https://ixfyboxlectgogogfrsc.supabase.co/functions/v1/negar-game";
+
+let game = '', started = 0, score = 0, round = 0;
+let sequence = [], selected = [], timer = null;
+const names = {catch:'شکار غذا',cook:'آشپز سریع',serve:'سرویس مشتری',memory:'حافظه غذایی'};
+const $ = id => document.getElementById(id);
+
+function show(id) {
+  document.querySelectorAll('.card').forEach(x => x.classList.add('hidden'));
+  $(id).classList.remove('hidden');
+  if (id === 'rank') loadRank();
+}
+
+async function call(action, data = {}) {
+  const response = await fetch(API, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({action, ...data, initData: tg?.initData || ''})
+  });
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.error || 'خطا');
+  return result;
+}
+
+async function refresh() {
+  try {
+    const p = await call('profile');
+    $('balance').textContent = p.player.balance;
+    $('avatar').textContent = p.player.character?.avatar || '👩‍🍳';
+  } catch (e) {
+    $('gameMsg').textContent = 'لطفاً بازی را از داخل تلگرام باز کن.';
+  }
+}
+
+async function saveAvatar(avatar) {
+  try {
+    await call('avatar', {avatar});
+    $('avatar').textContent = avatar;
+    alert('کاراکتر ذخیره شد!');
+  } catch (e) {
+    alert(e.message);
+  }
+}
+
+async function loadRank() {
+  try {
+    const result = await call('leaderboard');
+    $('ranking').innerHTML = result.players.map((p, i) =>
+      `<div class="row"><b>${i+1}. ${esc(p.first_name || 'بازیکن')}</b><span>⭐ ${p.score}</span></div>`
+    ).join('') || 'هنوز امتیازی ثبت نشده';
+  } catch (e) {
+    $('ranking').textContent = e.message;
+  }
+}
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+
+function startGame(g) {
+  game = g; score = 0; round = 0;
+  $('gameTitle').textContent = names[g];
+  $('gameMsg').textContent = 'درجه سختی را انتخاب کن و شروع را بزن.';
+  $('playarea').innerHTML = '🍔 🍕 🍟';
+  $('progress').style.width = '0%';
+  $('begin').textContent = 'شروع بازی';
+  $('begin').classList.remove('hidden');
+  show('play');
+}
+
+function beginRound() {
+  started = Date.now(); score = 0; round = 0; selected = [];
+  const d = $('difficulty').value;
+  const n = d === 'easy' ? 4 : d === 'medium' ? 6 : 8;
+  $('begin').classList.add('hidden');
+  if (game === 'catch') catchRound(n);
+  if (game === 'cook') cookRound(n);
+  if (game === 'serve') serveRound(n);
+  if (game === 'memory') memoryRound(n);
+}
+
+function finish() {
+  clearInterval(timer);
+  const elapsed = Date.now() - started;
+  $('begin').classList.remove('hidden');
+  $('begin').textContent = 'بازی دوباره';
+  $('gameMsg').textContent = 'امتیاز این دور: ' + score + ' از ' + round;
+  call('finish', {game, difficulty:$('difficulty').value, score, elapsed})
+    .then(x => {
+      $('gameMsg').textContent += ` | جایزه: ${x.reward} یورو مجازی`;
+      $('balance').textContent = x.balance;
+    })
+    .catch(e => $('gameMsg').textContent = e.message);
+}
+
+function update() {
+  $('progress').style.width = (round ? Math.min(100, score / round * 100) : 0) + '%';
+}
+
+function catchRound(n) {
+  const foods = ['🍕','🍔','🍟','🍗','🥗','🍩'];
+  round = n;
+  const target = foods[Math.floor(Math.random() * foods.length)];
+  $('playarea').innerHTML =
+    `<h2>فقط ${target} را انتخاب کن!</h2><div class="choices">${
+      Array.from({length:n}, () => foods[Math.floor(Math.random()*foods.length)])
+        .map(f => `<button class="btn food" onclick="pickCatch(this,'${f}','${target}')">${f}</button>`)
+        .join('')
+    }</div>`;
+}
+
+function pickCatch(el, food, target) {
+  if (el.disabled) return;
+  el.disabled = true;
+  if (food === target) { score++; el.style.background = '#9ee8bd'; }
+  else { el.style.background = '#ffb5b5'; }
+  update();
+  if (document.querySelectorAll('#playarea button:disabled').length === round) finish();
+}
+
+function cookRound(n) {
+  const orders = ['🍕+🧀','🍔+🥬','🍟+🧂','🍗+🍯'];
+  const target = orders[Math.floor(Math.random() * orders.length)];
+  round = n;
+  $('playarea').innerHTML =
+    `<h2>این سفارش را بساز:</h2><h1>${target}</h1><div class="choices">${
+      orders.map(x => `<button class="btn" onclick="cookPick('${x}','${target}')">${x}</button>`).join('')
+    }</div>`;
+}
+
+function cookPick(choice, target) {
+  if (choice === target) score++;
+  round = Math.max(round, 1);
+  update();
+  if (++selected.length >= ($('difficulty').value === 'easy' ? 4 : $('difficulty').value === 'medium' ? 6 : 8)) finish();
+  else cookRound(1);
+}
+
+function serveRound(n) {
+  const customers = ['👵🍕','🧔🍔','👧🍟','👨‍🦰🍗'];
+  const target = customers[Math.floor(Math.random() * customers.length)];
+  round = n;
+  $('playarea').innerHTML =
+    `<h2>سفارش مشتری:</h2><h1>${target}</h1><p>چی باید تحویل بدی؟</p><div class="choices">${
+      ['🍕','🍔','🍟','🍗'].sort(() => Math.random()-.5)
+        .map(f => `<button class="btn food" onclick="servePick('${f}','${target.slice(-1)}')">${f}</button>`).join('')
+    }</div>`;
+}
+
+function servePick(food, target) {
+  if (food === target) score++;
+  update();
+  if (++selected.length >= ($('difficulty').value === 'easy' ? 4 : $('difficulty').value === 'medium' ? 6 : 8)) finish();
+  else serveRound(1);
+}
+
+function memoryRound(n) {
+  const pairs = $('difficulty').value === 'easy' ? 2 : $('difficulty').value === 'medium' ? 3 : 4;
+  const foods = ['🍕','🍔','🍟','🍗'].slice(0, pairs);
+  sequence = [...foods, ...foods].sort(() => Math.random()-.5);
+  selected = []; round = pairs;
+  $('playarea').innerHTML = '<div class="choices">' +
+    sequence.map((f,i) => `<button class="btn food" id="m${i}" onclick="memoryPick(${i})">❔</button>`).join('') +
+    '</div>';
+}
+
+function memoryPick(i) {
+  if (selected.some(x => x.i === i) || selected.length >= 2) return;
+  $('m' + i).textContent = sequence[i];
+  selected.push({i, f:sequence[i]});
+  if (selected.length === 2) {
+    if (selected[0].f === selected[1].f) {
+      score++; selected = []; update();
+      if (score >= round) finish();
+    } else {
+      setTimeout(() => {
+        selected.forEach(x => $('m' + x.i).textContent = '❔');
+        selected = [];
+      }, 650);
+    }
+  }
+}
+
+refresh();
+</script>
+</body>
+</html>
