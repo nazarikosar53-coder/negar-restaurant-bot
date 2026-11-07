@@ -1,0 +1,203 @@
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>رستوران نگار</title>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Tahoma,sans-serif;
+  background:#fff4e9;
+  color:#38251b;
+  text-align:center;
+}
+header{
+  background:#ed702d;
+  color:white;
+  padding:25px;
+}
+h1{margin:5px}
+.card{
+  background:white;
+  margin:15px auto;
+  padding:18px;
+  border-radius:16px;
+  max-width:420px;
+  box-shadow:0 3px 12px #0001;
+}
+button{
+  background:#ed702d;
+  color:white;
+  border:0;
+  padding:12px 20px;
+  border-radius:10px;
+  margin:6px;
+  font-size:15px;
+  cursor:pointer;
+}
+.food{
+  display:inline-block;
+  width:43%;
+  margin:5px;
+  padding:12px;
+  background:#fff0e4;
+  border-radius:12px;
+}
+.food span{font-size:35px}
+#game{
+  height:260px;
+  background:#ffe0bd;
+  position:relative;
+  overflow:hidden;
+  border-radius:12px;
+}
+#burger{
+  position:absolute;
+  font-size:35px;
+  top:0;
+  left:50%;
+}
+.hidden{display:none}
+</style>
+</head>
+<body>
+
+<header>
+<h1>🍔 رستوران نگار</h1>
+<p>به رستوران خودت خوش اومدی!</p>
+</header>
+
+<div class="card">
+<h3>💰 موجودی شما</h3>
+<h2 id="balance">0 €</h2>
+</div>
+
+<div class="card">
+<h3>🍽️ منوی رستوران</h3>
+<div id="menu"></div>
+<p>قیمت هر غذا: 60 €</p>
+</div>
+
+<div class="card">
+<h3>🎮 بازی همبرگر</h3>
+<p>۳۰ ثانیه وقت داری همبرگر جمع کنی!</p>
+<p>هر همبرگر = ۱۰ یورو</p>
+<div id="game">
+<div id="burger">🍔</div>
+</div>
+<p>زمان: <span id="time">30</span></p>
+<p>امتیاز: <span id="score">0</span> €</p>
+<button onclick="startGame()">شروع بازی</button>
+<div>
+<button onclick="move(-1)">⬅️</button>
+<button onclick="move(1)">➡️</button>
+</div>
+</div>
+
+<div class="card">
+<h3>📜 پیام‌های رستوران</h3>
+<p id="message">به رستوران نگار خوش آمدی!</p>
+</div>
+
+<script>
+let balance=Number(localStorage.getItem("neg_balance")||0);
+let score=0;
+let playing=false;
+let seconds=30;
+let burgerX=50;
+let burgerY=0;
+let timer,gameLoop;
+
+const foods=[
+["🍔","همبرگر"],
+["🍕","پیتزا"],
+["🍗","مرغ سوخاری"],
+["🌭","هات داگ"],
+["🥙","فلافل"],
+["🥤","نوشابه"]
+];
+
+function update(){
+ document.getElementById("balance").textContent=balance+" €";
+ localStorage.setItem("neg_balance",balance);
+}
+
+function showMenu(){
+ document.getElementById("menu").innerHTML=foods.map((f,i)=>`
+ <div class="food">
+ <span>${f[0]}</span>
+ <p>${f[1]}</p>
+ <button onclick="buy(${i})">خرید ۶۰ €</button>
+ </div>
+ `).join("");
+}
+
+function buy(i){
+ if(balance<60){
+  message("موجودی کافی نیست! برو بازی کن 🍔");
+  return;
+ }
+ balance-=60;
+ balance+=1000;
+ update();
+ message("خرید "+foods[i][1]+" موفق بود! 🎉 جایزه ۱۰۰۰ یورویی گرفتی!");
+}
+
+function message(t){
+ document.getElementById("message").textContent=t;
+}
+
+function move(direction){
+ if(!playing)return;
+ burgerX=Math.max(5,Math.min(95,burgerX+direction*8));
+ document.getElementById("burger").style.left=burgerX+"%";
+}
+
+function startGame(){
+ if(playing)return;
+ playing=true;
+ seconds=30;
+ score=0;
+ burgerY=0;
+ burgerX=50;
+ document.getElementById("score").textContent="0";
+ document.getElementById("time").textContent=seconds;
+ message("بازی شروع شد! همبرگرها رو جمع کن!");
+ timer=setInterval(()=>{
+  seconds--;
+  document.getElementById("time").textContent=seconds;
+  if(seconds<=0)endGame();
+ },1000);
+ gameLoop=setInterval(()=>{
+  burgerY+=5;
+  let b=document.getElementById("burger");
+  b.style.top=burgerY+"px";
+  if(burgerY>220){
+   if(burgerX>35&&burgerX<65){
+    score+=10;
+    document.getElementById("score").textContent=score;
+   }
+   burgerY=0;
+   burgerX=Math.random()*85+5;
+   b.style.left=burgerX+"%";
+  }
+ },80);
+}
+
+function endGame(){
+ playing=false;
+ clearInterval(timer);
+ clearInterval(gameLoop);
+ balance+=score;
+ update();
+ message("بازی تمام شد! "+score+" یورو به دست آوردی! 🎉");
+}
+
+update();
+showMenu();
+</script>
+</body>
+</html>
