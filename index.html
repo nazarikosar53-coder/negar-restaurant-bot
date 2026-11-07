@@ -3,6 +3,7 @@
 <html lang="fa" dir="rtl">
 <head>
 <meta charset="UTF-8">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>رستوران نگار</title>
 <style>
@@ -69,6 +70,10 @@ button{
 <h1>🍔 رستوران نگار</h1>
 <p>به رستوران خودت خوش اومدی!</p>
 </header>
+  <div class="card">
+<h3>👤 بازیکن عزیز:</h3>
+<p id="playerName">مهمان</p>
+  </div>
 
 <div class="card">
 <h3>💰 موجودی شما</h3>
@@ -103,6 +108,17 @@ button{
 </div>
 
 <script>
+  const tg = window.Telegram.WebApp;
+
+tg.ready();
+tg.expand();
+
+const user = tg.initDataUnsafe.user;
+
+if (user) {
+  document.getElementById("playerName").textContent =
+    user.first_name;
+}
 let balance=Number(localStorage.getItem("neg_balance")||0);
 let score=0;
 let playing=false;
